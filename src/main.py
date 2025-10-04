@@ -8,6 +8,8 @@ from openai import OpenAI
 from pydantic import BaseModel
 from schema import CoreEventCreate, EventCreate, EventResponse, Option, Stats
 
+from fastapi.middleware.cors import CORSMiddleware
+
 load_dotenv()
 
 session = requests.Session()
@@ -19,6 +21,19 @@ session.headers.update(
 )
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+    # You can also use "*" to allow all origins, but not recommended in production
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # or ["*"] for all
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 SYSTEM_PROMPT = """
