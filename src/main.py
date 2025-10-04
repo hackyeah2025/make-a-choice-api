@@ -57,7 +57,7 @@ Example format:
 
 def generate_event_response(event: EventCreate, model: BaseModel, prompt: str):
     response = session.post(
-        "https://openrouter.ai/api/v1/chat/completions",
+        f"{os.getenv('OPENROUTER_API_URL')}/chat/completions",
         json={
             "model": "google/gemini-2.5-flash-preview-09-2025",
             "messages": [
