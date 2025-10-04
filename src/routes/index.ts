@@ -12,4 +12,5 @@ router.post('/test', (req, res) => {
     res.json({ message: 'Test endpoint', data: req.body });
 });
 
+
 export default router;

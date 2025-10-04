@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import 'dotenv/config'; // Load environment variables
 import routes from './routes';
 
 const app = express();
