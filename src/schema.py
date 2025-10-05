@@ -56,6 +56,7 @@ class EventResponse(BaseModel):
     text: str
     options: List[str]
 
+
 class EventResponseExtraField(EventResponse):
     extra_field: str
 
@@ -65,5 +66,17 @@ class EventResponseExtraField(EventResponse):
             title=event_response.title,
             text=event_response.text,
             options=event_response.options,
-            extra_field=extra_field
+            extra_field=extra_field,
         )
+
+
+class StateElement(BaseModel):
+    stats: Stats
+    event: dict  # Event object
+    choice: dict  # Option object
+
+
+class SummaryCreate(BaseModel):
+    stats: Stats
+    history: List[StateElement]
+    is_retired: bool
