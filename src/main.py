@@ -81,7 +81,7 @@ def generate_event_response(event: EventCreate, model: BaseModel, prompt: str):
     response = session.post(
         f"{os.getenv('OPENROUTER_API_URL')}/chat/completions",
         json={
-            "model": "google/gemini-2.5-flash-preview-09-2025",
+            "model": "openai/gpt-5-nano",
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt},
