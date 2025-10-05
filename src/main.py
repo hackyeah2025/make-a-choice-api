@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from openai import OpenAI
 from pydantic import BaseModel
-from schema import CoreEventCreate, EventCreate, EventResponse, Option, Stats
+from schema import CoreEventCreate, EventCreate, EventResponse, EventResponseExtraField, Option, Stats
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -71,6 +71,13 @@ Example format:
 
 
 def generate_event_response(event: EventCreate, model: BaseModel, prompt: str):
+    print('prompt')
+    print()
+    print()
+    print(prompt)
+    print()
+    print()
+    print(model.model_json_schema())
     response = session.post(
         f"{os.getenv('OPENROUTER_API_URL')}/chat/completions",
         json={
@@ -88,7 +95,7 @@ def generate_event_response(event: EventCreate, model: BaseModel, prompt: str):
     if response.status_code == 200:
         result = response.json()
         content = result.get("choices", [{}])[0].get("message", {}).get("content", "{}")
-        return EventResponse.model_validate_json(content)
+        return model.model_validate_json(content)
     else:
         raise Exception(
             f"API call failed with status {response.status_code}: {response.text}"
@@ -99,13 +106,20 @@ def get_base_prompt(stats: Stats, options: list[Option]):
     return f"Generate an event text for the following stats: {stats}. The event should have the following options consequences (add or subtract from the stats): {options}. The number of options should be {len(options)}. The options order should match the order of the options in the list."
 
 
-@app.post("/generate-event", response_model=EventResponse)
+@app.post("/generate-event", response_model=EventResponseExtraField)
 def generate_event(event: EventCreate):
     prompt = f"{get_base_prompt(event.stats, event.options)} The event should be in the following category: {event.category}"
-    return generate_event_response(event, EventResponse, prompt)
+    return EventResponseExtraField.from_event_response(generate_event_response(event, EventResponse, prompt))
 
 
-@app.post("/generate-core-event", response_model=EventResponse)
+@app.post("/generate-core-event", response_model=EventResponseExtraField)
 def generate_core_event(event: CoreEventCreate):
     prompt = f"{event.prompt} {get_base_prompt(event.stats, event.options)}"
-    return generate_event_response(event, EventResponse, prompt)
+
+    if event.extra_field:
+        prompt = f"{event.prompt} You must output extra_field with corresponding {event.extra_field}. {get_base_prompt(event.stats, event.options)}"
+    
+        return generate_event_response(event, EventResponseExtraField, prompt)
+    resp = EventResponseExtraField.from_event_response(generate_event_response(event, EventResponse, prompt))
+    print(resp)
+    return resp

@@ -47,6 +47,7 @@ class EventCreate(BaseModel):
 class CoreEventCreate(BaseModel):
     prompt: str
     stats: Stats
+    extra_field: str | None = None
     options: list[Option]
 
 
@@ -54,3 +55,15 @@ class EventResponse(BaseModel):
     title: str
     text: str
     options: List[str]
+
+class EventResponseExtraField(EventResponse):
+    extra_field: str
+
+    @staticmethod
+    def from_event_response(event_response: EventResponse, extra_field: str = ""):
+        return EventResponseExtraField(
+            title=event_response.title,
+            text=event_response.text,
+            options=event_response.options,
+            extra_field=extra_field
+        )
