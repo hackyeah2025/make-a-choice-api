@@ -120,7 +120,8 @@ The summary should:
 - If is_retired is true, focus on a successful retirement
 - If is_retired is false, explain why the player didn't reach retirement successfully
 - Be engaging and narrative, like a life story
-- Be concise but comprehensive (2-4 paragraphs)
+- Be concise but comprehensive (1-2 sentences)
+- Make sure that it is short enough and reads quickly.
 
 Example response:
 {
@@ -135,28 +136,33 @@ Example response:
 
 def generate_event_response(event: EventCreate, model: BaseModel, prompt: str):
 
-    response = session.post(
-        f"{os.getenv('OPENROUTER_API_URL')}/chat/completions",
-        json={
-            "model": "google/gemini-2.5-flash-preview-09-2025",
-            "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": prompt},
-            ],
-            "response_format": {
-                "type": "json_object",
-                "json_schema": model.model_json_schema(),
-            },
-        },
-    )
-    if response.status_code == 200:
-        result = response.json()
-        content = result.get("choices", [{}])[0].get("message", {}).get("content", "{}")
-        return model.model_validate_json(content)
-    else:
-        raise Exception(
-            f"API call failed with status {response.status_code}: {response.text}"
-        )
+    for i in range(5):
+        try:
+            response = session.post(
+                f"{os.getenv('OPENROUTER_API_URL')}/chat/completions",
+                json={
+                    "model": "google/gemini-2.5-flash-preview-09-2025",
+                    "messages": [
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "response_format": {
+                        "type": "json_object",
+                        "json_schema": model.model_json_schema(),
+                    },
+                },
+            )
+            if response.status_code == 200:
+                result = response.json()
+                content = result.get("choices", [{}])[0].get("message", {}).get("content", "{}")
+                return model.model_validate_json(content)
+            else:
+                raise Exception(
+                    f"API call failed with status {response.status_code}: {response.text}"
+                )
+        except Exception as e:
+            print(f"Error on attempt {i+1}: {e}")
+    raise Exception("Failed to generate event response after multiple attempts")
 
 
 def get_base_prompt(stats: Stats, options: list[Option]):
