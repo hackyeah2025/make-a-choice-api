@@ -123,6 +123,7 @@ The summary should:
 - THE MOST IMPORTANT THING IS TO GIVE PLAYER THAT LOST ADVICE WHAT DID HE DO BAD AND WHAT SHOULD HE/SHE DO INSTEAD!!!!
 THIS GAME AND SUMMARY OF IT NEEDS TO BE A VALUABLE LESSON FOR THE PLAYER
 - Make sure that it is short enough and reads quickly.
+- Don't note exact values of health, relations and happiness value change in description
 
 Example response:
 {
