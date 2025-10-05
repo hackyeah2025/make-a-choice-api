@@ -4,11 +4,18 @@ import requests
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from openai import OpenAI
 from pydantic import BaseModel
-from schema import CoreEventCreate, EventCreate, EventResponse, EventResponseExtraField, Option, Stats
 from requests.adapters import HTTPAdapter, Retry
-from fastapi.middleware.cors import CORSMiddleware
+from schema import (
+    CoreEventCreate,
+    EventCreate,
+    EventResponse,
+    EventResponseExtraField,
+    Option,
+    Stats,
+)
 
 load_dotenv()
 
@@ -53,18 +60,40 @@ You must return a JSON object with exactly these fields:
 - "text": A string describing the situation and context of the event
 - "options": An array of strings, where each string is a choice the player can make
 
+Stats description:
+name - name of the player
+age - age of the player
+
+priorities - list of priorities of the player
+
+health - health status of the player
+relations - satisfaction with relationships
+happiness - happiness of the player
+money - satisfaction with money
+income - income of the player
+expenses - monthly expenses
+savings - savings/money on hand of the player
+ZUS - ZUS contributions
+education - education level of the player
+job_experience - job experience of the player in form of 1-100
+job - current job of the player in form of "unemployed", "low_paid_job", "middle_paid_job", "high_paid_job"
+job_name - name of the current job
+has_serious_health_issues - true if the player has serious health issues
+relationship - relationship status of the player
+children - number of children of the player
+
 "text" should be interesting and engaging. Be concise and to the point.
 Don't make it longer than single sentence if this isn't necessary.
 
-Example format:
+Example response:
 {
-  "title": "Nieoczekiwane spotkanie na rynku",
-  "text": "Podczas codziennych zakupów na zatłoczonym rynku zauważasz, że ktoś upuścił portfel pełen pieniędzy. Wokół Ciebie przechadzają się różni ludzie, a właściciel portfela wydaje się być nieobecny. Zastanawiasz się, co zrobić w tej sytuacji. Możesz oddać portfel strażnikowi miejskimu, spróbować odnaleźć właściciela samodzielnie, zatrzymać portfel dla siebie lub po prostu odejść, udając, że nic nie widziałeś.",
+  "title": "Nagła decyzja podczas codzienności",
+  "text": "Wracając z pracy, zauważasz na chodniku portfel wypchany banknotami. Wokół przechodzą ludzie, a właściciela nie widać. Zastanawiasz się, jak postąpić w tej sytuacji. Czy oddać portfel odpowiednim służbom, poszukać właściciela na własną rękę, zatrzymać pieniądze dla siebie, czy po prostu odejść, jakby nic się nie stało?",
   "options": [
-    "Oddaj portfel strażnikowi miejskiemu",
-    "Spróbuj odnaleźć właściciela samodzielnie",
+    "Oddaj portfel odpowiednim służbom",
+    "Spróbuj samodzielnie znaleźć właściciela",
     "Zatrzymaj portfel dla siebie",
-    "Odejdź, udając, że nic nie widziałeś"
+    "Odejdź, ignorując sytuację"
   ]
 }
 """
@@ -75,7 +104,6 @@ Example format:
 
 
 def generate_event_response(event: EventCreate, model: BaseModel, prompt: str):
-
 
     response = session.post(
         f"{os.getenv('OPENROUTER_API_URL')}/chat/completions",
@@ -108,7 +136,9 @@ def get_base_prompt(stats: Stats, options: list[Option]):
 @app.post("/generate-event", response_model=EventResponseExtraField)
 def generate_event(event: EventCreate):
     prompt = f"{get_base_prompt(event.stats, event.options)} The event should be in the following category: {event.category}"
-    return EventResponseExtraField.from_event_response(generate_event_response(event, EventResponse, prompt))
+    return EventResponseExtraField.from_event_response(
+        generate_event_response(event, EventResponse, prompt)
+    )
 
 
 @app.post("/generate-core-event", response_model=EventResponseExtraField)
@@ -117,8 +147,10 @@ def generate_core_event(event: CoreEventCreate):
 
     if event.extra_field:
         prompt = f"{event.prompt} You must output extra_field with corresponding {event.extra_field}. {get_base_prompt(event.stats, event.options)}"
-    
+
         return generate_event_response(event, EventResponseExtraField, prompt)
-    resp = EventResponseExtraField.from_event_response(generate_event_response(event, EventResponse, prompt))
+    resp = EventResponseExtraField.from_event_response(
+        generate_event_response(event, EventResponse, prompt)
+    )
     print(resp)
     return resp
