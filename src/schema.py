@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 class Consequence(BaseModel):
     impacted: str
-    value: int
+    value: int | str
 
 
 class Option(BaseModel):
