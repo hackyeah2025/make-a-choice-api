@@ -120,7 +120,8 @@ The summary should:
 - If is_retired is true, focus on a successful retirement
 - If is_retired is false, explain why the player didn't reach retirement successfully
 - Be engaging and narrative, like a life story
-- Be concise but comprehensive (1-2 sentences)
+- THE MOST IMPORTANT THING IS TO GIVE PLAYER THAT LOST ADVICE WHAT DID HE DO BAD AND WHAT SHOULD HE/SHE DO INSTEAD!!!!
+THIS GAME AND SUMMARY OF IT NEEDS TO BE A VALUABLE LESSON FOR THE PLAYER
 - Make sure that it is short enough and reads quickly.
 
 Example response:
