@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from openai import OpenAI
 from pydantic import BaseModel
 from schema import CoreEventCreate, EventCreate, EventResponse, EventResponseExtraField, Option, Stats
-
+from requests.adapters import HTTPAdapter, Retry
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
@@ -19,6 +19,9 @@ session.headers.update(
         "Content-Type": "application/json",
     }
 )
+retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504])
+adapter = HTTPAdapter(max_retries=retries)
+session.mount("https://", adapter)
 
 app = FastAPI()
 
@@ -71,17 +74,12 @@ Example format:
 
 
 def generate_event_response(event: EventCreate, model: BaseModel, prompt: str):
-    print('prompt')
-    print()
-    print()
-    print(prompt)
-    print()
-    print()
-    print(model.model_json_schema())
+
+
     response = session.post(
         f"{os.getenv('OPENROUTER_API_URL')}/chat/completions",
         json={
-            "model": "openai/gpt-5-nano",
+            "model": "google/gemini-2.5-flash-preview-09-2025",
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt},
