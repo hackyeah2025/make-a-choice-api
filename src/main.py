@@ -54,6 +54,7 @@ You must return a JSON object with exactly these fields:
 - "options": An array of strings, where each string is a choice the player can make
 
 "text" should be interesting and engaging. Be concise and to the point.
+Don't make it longer than single sentence if this isn't necessary.
 
 Example format:
 {
